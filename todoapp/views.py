@@ -21,7 +21,7 @@ def index(request):
 
     form = ToDoForm()
 
-    list = ToDoList.objects.all()
+    list = ToDoList.objects.filter(user=request.user)
 
     context = {
         'form': form,
