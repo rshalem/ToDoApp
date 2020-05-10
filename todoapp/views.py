@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import ToDoList
@@ -30,6 +31,33 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
+def signup(request):
+
+    if request.method == "POST":
+        username = request.POST['username']
+        password1 = request.POST['pass']
+        password2 = request.POST['password2']
+
+        if password1 == password2:
+            if password1 and password2 != username:
+
+                if User.objects.filter(username=username).exists():
+                    messages.info(request, "Username already exists")
+                    return redirect('todoapp:register')
+                else:
+                    user = User.objects.create_user(username=username, password=password2)
+                    user.save()
+                    return redirect('todoapp:login')
+            messages.info(request, "Password shouldn't match with username, try something different")
+            return redirect('todoapp:register')
+
+        else:
+            messages.info(request, "Password didn't match")
+            return redirect('todoapp:register')
+
+    return render(request, 'sign_up.html')
+
+
 @login_required(login_url='/')
 def complete(request, id):
     task_obj = get_object_or_404(ToDoList, id=id)
@@ -43,7 +71,7 @@ def login_view(request):
 
     if request.method == "POST":
         username = request.POST['username']
-        password = request.POST['pass']
+        password = request.POST['password']
 
         user = authenticate(username=username, password=password)
         if user is not None:
@@ -64,5 +92,3 @@ def logout_view(request):
     logout(request)
     return redirect('todoapp:login')
 
-def signup(request):
-    return render(request, 'sign_up.html')
