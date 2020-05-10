@@ -30,6 +30,15 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
+@login_required(login_url='/')
+def complete(request, id):
+    task_obj = get_object_or_404(ToDoList, id=id)
+    task_obj.complete = True
+    task_obj.save()
+
+    return redirect('todoapp:homepage')
+
+
 def login_view(request):
 
     if request.method == "POST":
@@ -55,10 +64,5 @@ def logout_view(request):
     logout(request)
     return redirect('todoapp:login')
 
-@login_required(login_url='/')
-def complete(request, id):
-    task_obj = get_object_or_404(ToDoList, id=id)
-    task_obj.complete = True
-    task_obj.save()
-
-    return redirect('todoapp:homepage')
+def signup(request):
+    return render(request, 'sign_up.html')
